@@ -1,0 +1,59 @@
+{
+  "name": "cf-navs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:web": "vite",
+    "build": "vite build",
+    "type-check": "tsc --noEmit && svelte-check --tsconfig ./tsconfig.json",
+    "test": "vitest run",
+    "perf:audit": "node scripts/perf-audit.mjs",
+    "regression:chrome": "node scripts/chrome-regression.mjs",
+    "setup:wrangler": "node scripts/create-wrangler-local.mjs",
+    "wrangler": "node scripts/wrangler-config.mjs",
+    "dev": "node scripts/wrangler-config.mjs dev",
+    "deploy": "npm run build && node scripts/wrangler-config.mjs deploy",
+    "db:init": "node scripts/wrangler-config.mjs d1 execute DB --local --file=./schema.sql",
+    "db:init:remote": "node scripts/wrangler-config.mjs d1 execute DB --remote --file=./schema.sql"
+  },
+  "cloudflare": {
+    "label": "CF-Navs",
+    "products": [
+      "Workers",
+      "D1",
+      "KV"
+    ],
+    "bindings": {
+      "DB": {
+        "description": "D1 database for categories, bookmarks, settings, and installer-managed schema initialization."
+      },
+      "SESSION": {
+        "description": "KV namespace for HttpOnly administrator sessions; the installer also verifies this required binding before setup."
+      },
+      "SETUP_TOKEN": {
+        "description": "One-time encrypted secret required to authorize POST /api/install initialization of the database and administrator."
+      },
+      "INIT_ADMIN_PASSWORD": {
+        "description": "Legacy upgrade/recovery bootstrap secret. New Cloudflare Git and Wrangler CLI deployments use SETUP_TOKEN and /install instead."
+      }
+    }
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260702.1",
+    "@sveltejs/vite-plugin-svelte": "^3.1.2",
+    "@tsconfig/svelte": "^5.0.4",
+    "svelte": "^4.2.19",
+    "svelte-check": "^3.8.6",
+    "tslib": "^2.7.0",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.6",
+    "vitest": "^3.2.6",
+    "wrangler": "^4.107.0",
+    "ws": "^8.21.0"
+  },
+  "dependencies": {
+    "hono": "^4.12.27",
+    "sortablejs": "^1.15.3"
+  }
+}

@@ -1,0 +1,371 @@
+<script lang="ts">
+  import { createEventDispatcher, tick } from 'svelte'
+  import type { BackgroundSetting } from '../../../shared/types'
+  import {
+    backgroundTypeOptions,
+    defaultDarkBackground,
+    defaultDarkGradient,
+    defaultLightBackground,
+    defaultLightGradient,
+    normalizeBackgroundValueForType,
+  } from '../../lib/settingsForm'
+  import ColorAlphaInput from '../ColorAlphaInput.svelte'
+  import GradientBackgroundInput from '../GradientBackgroundInput.svelte'
+
+  export let theme: 'light' | 'dark'
+  export let background: BackgroundSetting
+  export let valid = true
+  export let uploadHost = ''
+
+  const dispatch = createEventDispatcher<{
+    change: BackgroundSetting
+    upload: void
+  }>()
+
+  $: isLight = theme === 'light'
+  $: title = isLight ? '浅色模式背景' : '深色模式背景'
+  $: badge = isLight ? 'Light' : 'Dark'
+  $: hint = backgroundTypeOptions.find((option) => option.value === background.type)?.hint ?? ''
+  $: colorPlaceholder = isLight ? '#f8fafc' : '#0f172a'
+  $: imagePlaceholder = isLight
+    ? 'https://img.example.com/light-bg.png'
+    : 'https://img.example.com/dark-bg.png'
+  $: imageInputLabel = isLight ? '浅色背景图片地址' : '深色背景图片地址'
+  $: gradientDefaults = isLight ? defaultLightGradient : defaultDarkGradient
+  $: gradientPlaceholder = isLight
+    ? 'linear-gradient(135deg, #e0f2fe, #f8fafc)'
+    : 'linear-gradient(135deg, #1e3a8a, #0f172a)'
+  $: defaults = isLight
+    ? {
+        color: defaultLightBackground.value,
+        gradientStart: defaultLightGradient.start,
+        gradientEnd: defaultLightGradient.end,
+      }
+    : {
+        color: defaultDarkBackground.value,
+        gradientStart: defaultDarkGradient.start,
+        gradientEnd: defaultDarkGradient.end,
+      }
+
+  async function syncBackground(): Promise<void> {
+    await tick()
+    dispatch('change', { ...background })
+  }
+
+  function updateBackgroundType(event: Event): void {
+    const nextType = (event.currentTarget as HTMLSelectElement).value as BackgroundSetting['type']
+    background = {
+      ...background,
+      type: nextType,
+      value: normalizeBackgroundValueForType(background.value, nextType, defaults),
+    }
+    dispatch('change', { ...background })
+  }
+</script>
+
+<section class="theme-background-card">
+  <div class="theme-background-header">
+    <strong>{title}</strong>
+    <span>{badge}</span>
+  </div>
+
+  <div class="background-form">
+    <div class="background-main-row">
+      <label class="field background-type-field">
+        <span>背景类型</span>
+        <select class="native-select" value={background.type} on:change={updateBackgroundType}>
+          {#each backgroundTypeOptions as option}
+            <option value={option.value}>{option.label}</option>
+          {/each}
+        </select>
+        <small class="background-type-hint">{hint}</small>
+      </label>
+
+      <div class="field background-value-field">
+        <span>背景值</span>
+        {#if background.type === 'color'}
+          <ColorAlphaInput
+            bind:value={background.value}
+            on:change={() => void syncBackground()}
+            placeholder={colorPlaceholder}
+            inputLabel={`${title}颜色值`}
+            swatchTitle={`选择${title}颜色`}
+            alphaText={`${title}透明度`}
+          />
+        {:else if background.type === 'gradient'}
+          <GradientBackgroundInput
+            bind:value={background.value}
+            on:change={() => void syncBackground()}
+            defaultStart={gradientDefaults.start}
+            defaultEnd={gradientDefaults.end}
+            startLabel={`${title}起始颜色`}
+            endLabel={`${title}结束颜色`}
+            manualLabel={`${title}完整渐变值`}
+            gradientPlaceholder={gradientPlaceholder}
+          />
+        {:else}
+          <div class="inline-input">
+            <input
+              bind:value={background.value}
+              type="text"
+              on:input={() => void syncBackground()}
+              placeholder={imagePlaceholder}
+              aria-label={imageInputLabel}
+            />
+            {#if uploadHost}
+              <button type="button" class="ghost-button" on:click={() => dispatch('upload')}>
+                打开图床上传 ↗
+              </button>
+            {/if}
+          </div>
+        {/if}
+        {#if background.type === 'color'}
+          <small>支持 #hex、rgb() 和 rgba()，也可点击色块选择颜色。</small>
+        {:else if background.type === 'gradient'}
+          <small>可用颜色选择器生成两色渐变，也可手动填写完整 CSS 渐变。</small>
+        {:else}
+          {#if uploadHost}
+            <small>填写图片外链 URL，或打开已配置图床上传。</small>
+          {:else}
+            <small>填写图片外链 URL；配置图床地址后可快速打开上传页。</small>
+          {/if}
+        {/if}
+        {#if !valid}
+          <small class="warn">请填写{isLight ? '浅色' : '深色'}模式背景值。</small>
+        {/if}
+      </div>
+    </div>
+
+    <div class="background-range-grid">
+      <label class="field">
+        <span>模糊度 <em>{background.blur}px</em></span>
+        <input bind:value={background.blur} type="range" min="0" max="40" step="1" on:input={() => void syncBackground()} />
+        <small>对图片/渐变背景应用模糊，0 表示不模糊。</small>
+      </label>
+
+      <label class="field">
+        <span>遮罩透明度 <em>{background.mask.toFixed(2)}</em></span>
+        <input bind:value={background.mask} type="range" min="0" max="1" step="0.05" on:input={() => void syncBackground()} />
+        <small>叠加在背景上的遮罩，数值越大背景越淡。</small>
+      </label>
+
+      <div class="field background-mask-field">
+        <span>遮罩颜色</span>
+        <ColorAlphaInput
+          bind:value={background.maskColor}
+          bind:alpha={background.mask}
+          on:change={() => void syncBackground()}
+          placeholder={isLight ? '#ffffff' : '#000000'}
+          inputLabel={`${title}遮罩颜色值`}
+          swatchTitle={`选择${title}遮罩颜色`}
+          alphaText={`${title}遮罩透明度`}
+        />
+        <small>{isLight ? '浅色常用白色或浅灰。' : '深色常用黑色或深蓝。'}</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .theme-background-card {
+    display: grid;
+    gap: 10px;
+    min-width: 0;
+    border: 1px solid var(--sp-theme-card-border);
+    border-radius: 14px;
+    padding: 12px;
+    background: var(--sp-theme-card-bg);
+  }
+
+  .theme-background-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .theme-background-header strong {
+    color: var(--sp-heading);
+    font-size: 14px;
+  }
+
+  .theme-background-header span {
+    border-radius: 999px;
+    background: var(--sp-chip-sky-bg);
+    color: var(--sp-chip-sky-text);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 8px;
+  }
+
+  .background-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .background-main-row,
+  .background-range-grid {
+    display: contents;
+  }
+
+  .field {
+    display: grid;
+    gap: 6px;
+  }
+
+  .background-type-field,
+  .background-value-field {
+    min-width: 0;
+    align-content: start;
+  }
+
+  .background-type-field,
+  .background-range-grid > .field {
+    order: 1;
+  }
+
+  .background-value-field {
+    grid-column: 1 / -1;
+    order: 2;
+    padding-top: 2px;
+  }
+
+  .background-type-field select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .background-type-hint {
+    display: block;
+    min-width: 0;
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .background-mask-field {
+    min-width: 0;
+  }
+
+  .background-value-field .inline-input {
+    min-width: 0;
+  }
+
+  .background-value-field .ghost-button {
+    flex: 0 0 auto;
+    padding-inline: 12px;
+  }
+
+  .field span {
+    color: var(--sp-label);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .field span em {
+    font-style: normal;
+    color: var(--sp-accent);
+    font-weight: 600;
+  }
+
+  small {
+    color: var(--sp-muted);
+    line-height: 1.55;
+  }
+
+  small.warn {
+    color: var(--sp-warn);
+  }
+
+  input:not([type='radio']):not([type='checkbox']),
+  select {
+    --select-hover-border: var(--sp-input-hover-border);
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid var(--sp-input-border);
+    border-radius: 10px;
+    padding: 9px 11px;
+    font-size: 14px;
+    color: var(--sp-input-text);
+    background-color: var(--sp-input-bg);
+    font-family: inherit;
+    transition:
+      border-color 0.18s ease,
+      box-shadow 0.18s ease,
+      background 0.18s ease;
+  }
+
+  input[type='range'] {
+    padding: 0;
+    accent-color: var(--sp-accent);
+  }
+
+  input:focus,
+  select:focus {
+    outline: none;
+    border-color: var(--sp-accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  }
+
+  .inline-input {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .inline-input input {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .ghost-button {
+    border: 1px solid var(--sp-input-border);
+    border-radius: 10px;
+    background: var(--sp-input-bg);
+    color: var(--sp-text);
+    padding: 10px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition:
+      border-color 0.18s ease,
+      background 0.18s ease,
+      color 0.18s ease,
+      transform 0.18s ease;
+    white-space: nowrap;
+  }
+
+  .ghost-button:hover:not(:disabled) {
+    border-color: var(--sp-input-hover-border);
+    background: var(--sp-toggle-hover-bg);
+  }
+
+  .ghost-button:disabled,
+  input:disabled,
+  select:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  @media (max-width: 720px) {
+    .background-form {
+      grid-template-columns: 1fr;
+    }
+
+    .background-type-field,
+    .background-type-field select {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .background-value-field .inline-input {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .background-value-field .ghost-button {
+      width: 100%;
+    }
+  }
+</style>

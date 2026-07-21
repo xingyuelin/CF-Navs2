@@ -1,0 +1,279 @@
+<script lang="ts">
+  import type { ImportSource } from '../lib/importData'
+
+  type AsyncVoid<T = void> = T | Promise<T>
+
+  export let isAuthenticated = false
+  export let importing = false
+  export let backupError = ''
+  export let backupMessage = ''
+  export let importSource: ImportSource = 'cf-navs'
+  export let onExportData: (() => AsyncVoid) | undefined = undefined
+  export let onImportData: ((file: File, source: ImportSource, mode: 'replace' | 'merge') => AsyncVoid) | undefined = undefined
+
+  let importInput: HTMLInputElement | null = null
+  let importMode: 'replace' | 'merge' = 'replace'
+
+
+  function triggerImport() {
+    importInput?.click()
+  }
+
+  async function handleImportChange(event: Event) {
+    const input = event.currentTarget as HTMLInputElement
+    const file = input.files?.[0]
+    if (file && onImportData) {
+      const source = /\.html?$/i.test(file.name) ? 'browser-html' : importSource
+      await onImportData(file, source, source === 'browser-html' && importSource !== 'browser-html' ? 'merge' : importMode)
+    }
+    input.value = ''
+  }
+
+  async function handleDrop(event: DragEvent) {
+    event.preventDefault()
+    const file = event.dataTransfer?.files?.[0]
+    if (!file || !onImportData) return
+    const source = /\.html?$/i.test(file.name) ? 'browser-html' : importSource
+    await onImportData(file, source, source === 'browser-html' && importSource !== 'browser-html' ? 'merge' : importMode)
+  }
+</script>
+
+<section class="panel backup-panel">
+  <div class="panel-header">
+    <div>
+      <p class="panel-eyebrow">数据备份与导入</p>
+      <h2>导入 / 导出</h2>
+    </div>
+  </div>
+  <p class="backup-desc">
+    导出会把当前全部分类、书签与站点设置保存为一个 JSON 文件；导入时可选择
+    <strong>追加合并</strong>或<strong>覆盖现有数据</strong>，管理员账号不受影响。
+  </p>
+
+  {#if backupError}
+    <p class="backup-alert error">{backupError}</p>
+  {:else if backupMessage}
+    <p class="backup-alert ok">{backupMessage}</p>
+  {/if}
+
+  <div class="backup-operations">
+    <section class="backup-operation" aria-labelledby="export-backup-title">
+      <div class="backup-operation-copy">
+        <h3 id="export-backup-title">导出当前数据</h3>
+        <p>将当前分类、书签与站点设置下载为 JSON 备份文件。</p>
+      </div>
+      <button type="button" class="primary-button" on:click={() => onExportData?.()} disabled={!isAuthenticated}>
+        导出备份
+      </button>
+    </section>
+
+    <section class="backup-operation" aria-labelledby="import-backup-title" on:dragover|preventDefault on:drop={handleDrop}>
+      <div class="backup-operation-copy">
+        <h3 id="import-backup-title">导入数据</h3>
+        <p>支持点击或拖放 JSON、HTML、HTM 文件，格式会自动识别。</p>
+      </div>
+      <div class="import-actions">
+        <label class="import-source-field" for="import-source">
+          <span>导入来源</span>
+          <select class="native-select" id="import-source" bind:value={importSource} on:change={() => { if (importSource === 'browser-html') importMode = 'merge' }} disabled={!isAuthenticated || importing}>
+            <option value="cf-navs">CF-Navs 备份</option>
+            <option value="sunpanel">SunPanel 导出</option>
+            <option value="browser-html">浏览器书签 HTML</option>
+          </select>
+        </label>
+        <label class="import-source-field"><span>导入模式</span><select class="native-select" bind:value={importMode} disabled={!isAuthenticated || importing}><option value="merge">追加合并</option><option value="replace">覆盖现有数据</option></select></label>
+        <button type="button" class="ghost-button" on:click={triggerImport} disabled={!isAuthenticated || importing}>
+          {#if importing}导入中...{:else}选择文件并导入{/if}
+        </button>
+        <input
+          bind:this={importInput}
+          class="import-input"
+          type="file"
+          accept="application/json,text/html,.json,.html,.htm,.sun-panel.json,.sunpanel.json"
+          on:change={handleImportChange}
+        />
+      </div>
+    </section>
+  </div>
+</section>
+
+<style>
+  .panel {
+    border: 1px solid var(--admin-border);
+    border-radius: 18px;
+    background: var(--admin-surface);
+    box-shadow: var(--admin-shadow);
+    padding: 18px;
+  }
+
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .panel-eyebrow {
+    margin: 0 0 8px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--admin-subtle);
+  }
+
+  h2,
+  p {
+    margin: 0;
+  }
+
+  h2 {
+    font-size: 22px;
+  }
+
+  .backup-desc {
+    color: var(--admin-muted);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  .backup-operations {
+    display: grid;
+    gap: 12px;
+  }
+
+  .backup-operation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 16px;
+    border: 1px solid var(--admin-border);
+    border-radius: 14px;
+    background: var(--admin-control-bg);
+  }
+
+  .backup-operation-copy {
+    min-width: 0;
+  }
+
+  .backup-operation-copy h3 {
+    margin: 0 0 5px;
+    font-size: 15px;
+  }
+
+  .backup-operation-copy p {
+    color: var(--admin-muted);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .import-actions {
+    display: flex;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .import-source-field {
+    display: inline-grid;
+    gap: 6px;
+    min-width: 180px;
+  }
+
+  .import-source-field span {
+    color: var(--admin-muted);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .import-source-field select {
+    --select-hover-border: var(--admin-input-hover-border);
+    min-height: 39px;
+    border: 1px solid var(--admin-input-border);
+    border-radius: 12px;
+    background: var(--admin-input-bg);
+    color: var(--admin-text);
+    font: inherit;
+    padding: 8px 12px;
+  }
+
+  .import-input {
+    display: none;
+  }
+
+  .backup-alert {
+    margin: 0 0 14px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 14px;
+  }
+
+  .backup-alert.error {
+    border: 1px solid var(--admin-danger-border);
+    background: var(--admin-danger-bg);
+    color: var(--admin-danger);
+  }
+
+  .backup-alert.ok {
+    border: 1px solid var(--admin-ok-border);
+    background: var(--admin-ok-bg);
+    color: var(--admin-ok);
+  }
+
+  .primary-button,
+  .ghost-button {
+    min-height: 39px;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.18s ease;
+  }
+
+  .primary-button {
+    border: none;
+    background: #2563eb;
+    color: #ffffff;
+  }
+
+  .ghost-button {
+    border: 1px solid var(--admin-input-border);
+    background: var(--admin-control-bg);
+    color: var(--admin-text);
+  }
+
+  .ghost-button:hover:not(:disabled) {
+    border-color: var(--admin-input-hover-border);
+    background: var(--admin-control-hover-bg);
+  }
+
+  .primary-button:disabled,
+  .ghost-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  @media (max-width: 760px) {
+    .backup-operation {
+      align-items: stretch;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .import-actions {
+      justify-content: flex-start;
+    }
+
+    .import-source-field {
+      flex: 1 1 180px;
+    }
+
+    .primary-button,
+    .ghost-button {
+      align-self: flex-start;
+    }
+  }
+</style>

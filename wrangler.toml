@@ -1,0 +1,38 @@
+name = "cf-navs"
+main = "worker/index.ts"
+compatibility_date = "2025-06-01"
+compatibility_flags = ["nodejs_compat"]
+keep_vars = true
+
+# 将安装器使用的 schema.sql 作为文本模块打包进 Worker。
+[[rules]]
+type = "Text"
+globs = ["**/schema.sql"]
+fallthrough = true
+
+# 编译后的 Svelte 静态资源；SPA 模式，未命中的路径回退到 index.html
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+[vars]
+# 管理员用户名在 /install 首次安装时设置；下列变量仅用于本地/CLI 兼容流程。
+INIT_ADMIN_USER = "admin"
+# 旧版 CLI 初始化密码请用 secret，不要写明文：
+#   wrangler secret put INIT_ADMIN_PASSWORD
+# 旧数据库首次升级或强制重置时设置一个新的唯一标记：
+#   RESET_ADMIN_CREDENTIALS = "reset-2026-07-12"
+# Token 有效期（秒），默认 7 天
+SESSION_TTL = "604800"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "cf-navs-db"
+# Cloudflare Git deployments automatically provision the D1 database when the
+# database_id is omitted. Local CLI deployments use wrangler.local.toml.
+
+[[kv_namespaces]]
+binding = "SESSION"
+# Cloudflare Git deployments automatically provision the KV namespace when the
+# id is omitted. Local CLI deployments use wrangler.local.toml.
