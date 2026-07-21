@@ -100,8 +100,8 @@ const settings: Settings = {
 describe('app data adapters', () => {
   it('maps admin categories and bookmark display values', () => {
     expect(toAdminCategories([categoryA, categoryB], [bookmarkA, bookmarkB])).toEqual([
-      { id: 1, title: 'Tools', icon: 'tool', bookmarkCount: 2 },
-      { id: 2, title: 'Docs', icon: '', bookmarkCount: 0 },
+      { id: 1, title: 'Tools', icon: 'tool', bookmarkCount: 2, hidden: 0 },
+      { id: 2, title: 'Docs', icon: '', bookmarkCount: 0, hidden: 0 },
     ])
 
     expect(toAdminBookmarks([bookmarkA, bookmarkB])).toMatchObject([

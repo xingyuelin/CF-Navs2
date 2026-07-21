@@ -35,6 +35,7 @@ const settings: Settings = {
   content_layout: { max_width: 1200, max_width_unit: 'px', margin_x: 0, margin_top: 0, margin_bottom: 0 },
   navigation: { position: 'left', always_expanded: false },
   footer_html: '<p>Footer</p>',
+  hide_password: '',
 }
 
 describe('shared settings metadata', () => {

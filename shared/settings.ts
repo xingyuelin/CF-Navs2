@@ -27,6 +27,7 @@ export const SETTINGS_KEYS = [
   'content_layout',
   'navigation',
   'footer_html',
+  'hide_password',
 ] as const satisfies readonly (keyof Settings)[]
 
 export const PUBLIC_SETTINGS_KEYS = [

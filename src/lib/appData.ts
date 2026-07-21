@@ -10,6 +10,7 @@ export type AdminCategorySummary = {
   title: string
   icon?: string
   bookmarkCount?: number
+  hidden?: number
 }
 
 export type AdminBookmarkSummary = {
@@ -29,7 +30,7 @@ export type AdminBookmarkSummary = {
 
 export type SettingsFormValue = Pick<
   Settings,
-  'site_title' | 'site_title_color' | 'site_title_font_size' | 'public_mode' | 'theme' | 'background_preset_id' | 'custom_css' | 'custom_js' | 'image_host_url' | 'background' | 'backgrounds' | 'search_engine' | 'card_size' | 'card_style' | 'card_icon_size' | 'card_show_description' | 'card_description_mode' | 'card_background_color' | 'card_background_opacity' | 'card_icon_show_title' | 'card_text_color' | 'search_box_show' | 'search_engine_selector_show' | 'content_layout' | 'navigation' | 'footer_html'
+  'site_title' | 'site_title_color' | 'site_title_font_size' | 'public_mode' | 'theme' | 'background_preset_id' | 'custom_css' | 'custom_js' | 'image_host_url' | 'background' | 'backgrounds' | 'search_engine' | 'card_size' | 'card_style' | 'card_icon_size' | 'card_show_description' | 'card_description_mode' | 'card_background_color' | 'card_background_opacity' | 'card_icon_show_title' | 'card_text_color' | 'search_box_show' | 'search_engine_selector_show' | 'content_layout' | 'navigation' | 'footer_html' | 'hide_password'
 >
 
 export function toAdminCategories(categories: Category[], bookmarks: Bookmark[]): AdminCategorySummary[] {
@@ -46,6 +47,7 @@ export function toAdminCategories(categories: Category[], bookmarks: Bookmark[])
     title: category.title,
     icon: category.icon ?? '',
     bookmarkCount: bookmarkCountByCategory.get(category.id) ?? 0,
+    hidden: category.hidden ?? 0,
   }))
 }
 
@@ -118,6 +120,7 @@ export function toSettingsForm(settings: Settings | null): SettingsFormValue | n
     content_layout: settings.content_layout,
     navigation: settings.navigation,
     footer_html: settings.footer_html,
+    hide_password: settings.hide_password,
   }
 }
 

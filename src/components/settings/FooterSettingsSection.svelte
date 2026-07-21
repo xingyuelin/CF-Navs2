@@ -25,6 +25,20 @@
   </label>
 </fieldset>
 
+<fieldset id="settings-section-hide" class="group group-wide" disabled={saving} on:input={() => void syncForm()}>
+  <legend>隐藏分类</legend>
+  <p class="group-desc">设置 /hide 页面的访问密码。设置后，被标记为隐藏的分类将不出现在首页，仅通过 /hide 页面输入密码查看。</p>
+  <label class="field full-width">
+    <span>隐藏页面密码</span>
+    <input
+      type="password"
+      bind:value={form.hide_password}
+      placeholder="留空表示不启用隐藏功能"
+    />
+    <small>密码区分大小写。修改后旧密码立即失效。</small>
+  </label>
+</fieldset>
+
 <style>
   .field.full-width {
     grid-column: 1 / -1;

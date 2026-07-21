@@ -152,6 +152,7 @@ function prepareSunPanelImport(parsed: unknown): PreparedImport {
       title: readString(rawCategory.title, `Category ${categoryId}`).trim() || `Category ${categoryId}`,
       icon: null,
       sort: readNumber(rawCategory.sort, categoryIndex),
+      hidden: 0,
       created_at: now,
     })
 
@@ -251,7 +252,7 @@ export function prepareBrowserBookmarkHtml(text: string): PreparedImport {
     const normalized = title.trim() || '浏览器书签'
     const existing = categoryByTitle.get(normalized)
     if (existing) return existing
-    const category: Category = { id: nextCategoryId++, title: normalized, icon: null, sort: categories.length, created_at: now }
+    const category: Category = { id: nextCategoryId++, title: normalized, icon: null, sort: categories.length, hidden: 0, created_at: now }
     categories.push(category); categoryByTitle.set(normalized, category); nextSort.set(category.id, 0)
     return category
   }

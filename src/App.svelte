@@ -90,7 +90,13 @@
     if (typeof window === 'undefined') return false
     return window.location.pathname === '/admin' || window.location.pathname === '/admin/'
   }
+
+  function isHidePath(): boolean {
+    if (typeof window === 'undefined') return false
+    return window.location.pathname === '/hide' || window.location.pathname === '/hide/'
+  }
   let AdminComponent: typeof import('./views/Admin.svelte').default | null = null
+  let HideComponent: typeof import('./views/Hide.svelte').default | null = null
   let LoginModalComponent: typeof import('./components/LoginModal.svelte').default | null = null
   let BookmarkEditModalComponent: typeof import('./components/BookmarkEditModal.svelte').default | null = null
   let confirmDialog: ConfirmDialogState | null = null
@@ -101,6 +107,14 @@
     getCurrent: () => AdminComponent,
     setCurrent: (component) => {
       AdminComponent = component
+    },
+  })
+
+  const ensureHideComponent = createLazyComponentLoader({
+    load: () => import('./views/Hide.svelte'),
+    getCurrent: () => HideComponent,
+    setCurrent: (component) => {
+      HideComponent = component
     },
   })
 
@@ -410,7 +424,11 @@
       await ensureLoginModalComponent()
     }
     loginModalOpen = homeGate.loginModalOpen
-    if (isAdminPath() && isLoggedIn()) {
+    if (isHidePath()) {
+      await ensureHideComponent()
+      currentView = 'hide'
+      loginModalOpen = false
+    } else if (isAdminPath() && isLoggedIn()) {
       await ensureAdminComponent()
       currentView = 'admin'
       loginModalOpen = false
@@ -911,6 +929,8 @@
           <p>当前站点未公开，登录后再加载后台管理界面。</p>
         </div>
       </div>
+    {:else if currentView === 'hide' && HideComponent}
+      <svelte:component this={HideComponent} />
     {:else if AdminComponent}
       <svelte:component
         this={AdminComponent}

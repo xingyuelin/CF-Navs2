@@ -10,6 +10,7 @@ import categoriesRoutes from './routes/categories'
 import dataRoutes from './routes/data'
 import errorReportRoutes from './routes/errorReport'
 import faviconRoutes from './routes/favicon'
+import hideRoutes from './routes/hide'
 import installRoutes from './routes/install'
 import { iconRoutes } from './routes/icon'
 import publicRoutes from './routes/public'
@@ -24,6 +25,7 @@ app.route('/api', authRoutes)
 app.route('/api', installRoutes)
 app.route('/api', publicRoutes)
 app.route('/api', errorReportRoutes) // 公开错误上报，无需认证
+app.route('/api', hideRoutes) // 隐藏分类验证，无需认证
 
 app.use('/api/admin', authRequired)
 app.use('/api/admin/*', authRequired)

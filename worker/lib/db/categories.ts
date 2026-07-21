@@ -13,20 +13,21 @@ export async function listCategories(db: D1Database): Promise<Category[]> {
 
 export async function getCategory(db: D1Database, id: number): Promise<Category | null> {
   return await db
-    .prepare('SELECT id, title, icon, sort, created_at FROM categories WHERE id = ?')
+    .prepare('SELECT id, title, icon, hidden, sort, created_at FROM categories WHERE id = ?')
     .bind(id)
     .first<Category>()
 }
 
 export async function createCategory(db: D1Database, req: CategoryUpsertReq): Promise<Category> {
   const now = Date.now()
+  const hidden = req.hidden ?? 0
   const category = await db
     .prepare(
-      `INSERT INTO categories (title, icon, sort, created_at)
-       SELECT ?, ?, COALESCE(MAX(sort), -1) + 1, ? FROM categories
-       RETURNING id, title, icon, sort, created_at`,
+      `INSERT INTO categories (title, icon, hidden, sort, created_at)
+       SELECT ?, ?, ?, COALESCE(MAX(sort), -1) + 1, ? FROM categories
+       RETURNING id, title, icon, hidden, sort, created_at`,
     )
-    .bind(req.title, req.icon ?? null, now)
+    .bind(req.title, req.icon ?? null, hidden, now)
     .first<Category>()
 
   if (!category) {
@@ -41,9 +42,10 @@ export async function updateCategory(
   id: number,
   req: CategoryUpsertReq,
 ): Promise<Category | null> {
+  const hidden = req.hidden ?? 0
   return await db
-    .prepare('UPDATE categories SET title = ?, icon = ? WHERE id = ? RETURNING id, title, icon, sort, created_at')
-    .bind(req.title, req.icon ?? null, id)
+    .prepare('UPDATE categories SET title = ?, icon = ?, hidden = ? WHERE id = ? RETURNING id, title, icon, hidden, sort, created_at')
+    .bind(req.title, req.icon ?? null, hidden, id)
     .first<Category>()
 }
 

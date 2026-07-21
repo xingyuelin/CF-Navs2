@@ -68,6 +68,7 @@ export const DEFAULT_SETTINGS: Settings = {
     always_expanded: false,
   },
   footer_html: '',
+  hide_password: '',
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

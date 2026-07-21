@@ -77,6 +77,7 @@ export const emptySettingsForm: SettingsFormModel = {
   content_layout: { max_width: 1200, max_width_unit: 'px', margin_x: 0, margin_top: 0, margin_bottom: 0 },
   navigation: { position: 'left', always_expanded: false },
   footer_html: '',
+  hide_password: '',
 }
 
 export function cloneSettingsForm(source: SettingsFormModel): SettingsFormModel {
@@ -113,6 +114,7 @@ export function cloneSettingsForm(source: SettingsFormModel): SettingsFormModel 
     content_layout: { ...source.content_layout },
     navigation: { ...source.navigation },
     footer_html: source.footer_html,
+    hide_password: source.hide_password,
   }
 }
 
@@ -225,6 +227,7 @@ export function createSettingsFormState(
       always_expanded: navigation?.always_expanded ?? false,
     },
     footer_html: source?.footer_html ?? '',
+    hide_password: source?.hide_password ?? '',
   }
 }
 
@@ -305,6 +308,7 @@ export function normalizeSettingsForm(source: SettingsFormModel): SettingsFormMo
       always_expanded: Boolean(source.navigation.always_expanded),
     },
     footer_html: source.footer_html.trim(),
+    hide_password: source.hide_password ?? '',
   }
 }
 

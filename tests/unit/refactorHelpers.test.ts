@@ -137,6 +137,7 @@ describe('refactored helper modules', () => {
     expect(toCategoryPayload({ title: '  Tools  ', icon: '  tool  ' })).toEqual({
       title: 'Tools',
       icon: 'tool',
+      hidden: 0,
     })
 
     expect(toBookmarkPayload({

@@ -12,6 +12,7 @@ export function toCategoryPayload(form: CategoryFormValue): CategoryUpsertReq {
   return {
     title: form.title.trim(),
     icon: form.icon.trim() || null,
+    hidden: form.hidden ?? 0,
   }
 }
 
@@ -34,6 +35,7 @@ export function toCategoryForm(category: Category): CategoryFormValue {
     id: category.id,
     title: category.title,
     icon: category.icon ?? '',
+    hidden: category.hidden ?? 0,
   }
 }
 

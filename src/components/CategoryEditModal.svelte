@@ -22,6 +22,7 @@
   const emptyForm: CategoryFormValue = {
     title: '',
     icon: '',
+    hidden: 0,
   }
 
   export let open = false
@@ -51,6 +52,7 @@
       ...(value ?? {}),
       title: value?.title ?? '',
       icon: value?.icon ?? '',
+      hidden: value?.hidden ?? 0,
     }
     const iconifySelection = initializeBookmarkIconifySelection({
       mode,
@@ -173,6 +175,7 @@
       ...form,
       title: form.title.trim(),
       icon: (iconifySelected ? iconifyIcon(iconifyName) : form.icon).trim(),
+      hidden: form.hidden,
     })
   }
 
@@ -239,6 +242,11 @@
           onSelectIcon={selectIconifyIcon}
           onSelectCandidate={selectIconifySearchCandidate}
         />
+
+        <label class="checkbox-label">
+          <input type="checkbox" bind:checked={form.hidden} trueValue={1} falseValue={0} />
+          <span>隐藏此分类（不在首页显示，仅通过 /hide 页面访问）</span>
+        </label>
 
         {#if error}
           <p class="error-text">{error}</p>
@@ -388,5 +396,21 @@
   .ghost-button:disabled {
     cursor: not-allowed;
     opacity: 0.6;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #475569;
+    cursor: pointer;
+  }
+
+  .checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #2563eb;
   }
 </style>

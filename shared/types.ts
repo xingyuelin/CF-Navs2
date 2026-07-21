@@ -8,6 +8,7 @@ export interface Category {
   title: string
   icon: string | null
   sort: number
+  hidden: number
   created_at: number
 }
 
@@ -145,6 +146,7 @@ export interface Settings {
   content_layout: ContentLayoutSetting
   navigation: NavigationSetting
   footer_html: string
+  hide_password: string
 }
 
 // ========== API 统一响应包络 ==========
@@ -275,6 +277,7 @@ export interface SiteConfig {
 export interface CategoryUpsertReq {
   title: string
   icon?: string | null
+  hidden?: number
 }
 
 // POST/PUT 书签
@@ -361,3 +364,16 @@ export interface BatchDeleteCategoriesResp {
 
 // PUT /api/settings  —— 部分更新，传哪些 key 改哪些
 export type SettingsUpdateReq = Partial<Settings>
+
+// ========== 隐藏分类 ==========
+
+// POST /api/hide/verify
+export interface HideVerifyReq {
+  password: string
+}
+
+export interface HideVerifyResp {
+  valid: boolean
+  categories: PublicCategory[]
+  bookmarks: PublicBookmark[]
+}

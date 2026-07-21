@@ -1,4 +1,4 @@
-export type AppView = 'home' | 'admin' | 'login'
+export type AppView = 'home' | 'admin' | 'login' | 'hide'
 
 type HomeAccessInput = {
   publicMode: boolean | null | undefined

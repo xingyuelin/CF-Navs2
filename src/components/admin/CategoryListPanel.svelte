@@ -196,6 +196,9 @@
               </span>
               <div class="admin-compact-info">
                 <h3>{category.title}</h3>
+                {#if category.hidden}
+                  <span class="admin-hidden-badge">隐藏</span>
+                {/if}
                 <span class="admin-count-badge">{getAdminCategoryBookmarkCount(category, bookmarks)} 个书签</span>
               </div>
               {#if !sortMode}
@@ -397,5 +400,16 @@
       min-width: 0;
       flex: 1 1 auto;
     }
+  }
+
+  .admin-hidden-badge {
+    flex-shrink: 0;
+    padding: 1px 8px;
+    border-radius: 10px;
+    background: #fef3c7;
+    color: #92400e;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
   }
 </style>

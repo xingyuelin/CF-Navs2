@@ -68,6 +68,7 @@ categoriesRoutes.post('/', async (c) => {
     const category = await createCategory(c.env.DB, {
       title: body.title.trim(),
       icon: body.icon ?? null,
+      hidden: body.hidden ?? 0,
     })
     await touchDataVersion(c.env.DB)
     invalidateRuntimeDataCache()
@@ -91,6 +92,7 @@ categoriesRoutes.put('/:id', async (c) => {
     const category = await updateCategory(c.env.DB, id, {
       title: body.title.trim(),
       icon: body.icon ?? null,
+      hidden: body.hidden ?? 0,
     })
     if (!category) return c.json(fail(ErrCode.NOT_FOUND, 'category not found'))
     await touchDataVersion(c.env.DB)

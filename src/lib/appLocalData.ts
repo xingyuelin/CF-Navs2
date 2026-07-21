@@ -91,6 +91,7 @@ export function upsertPublicCategory(categories: PublicCategory[], category: Cat
     id: category.id,
     title: category.title,
     icon: category.icon,
+    hidden: category.hidden,
     sort: category.sort,
   })
 }

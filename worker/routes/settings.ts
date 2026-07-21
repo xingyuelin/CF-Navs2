@@ -172,6 +172,9 @@ settingsRoutes.put('/', async (c) => {
   if (body.footer_html !== undefined && typeof body.footer_html !== 'string') {
     return badRequest(c, 'invalid footer_html')
   }
+  if (body.hide_password !== undefined && typeof body.hide_password !== 'string') {
+    return badRequest(c, 'invalid hide_password')
+  }
 
   try {
     const settingsPatch: SettingsUpdateReq = { ...body }

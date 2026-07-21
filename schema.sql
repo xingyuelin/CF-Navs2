@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS categories (
   title       TEXT NOT NULL,
   icon        TEXT,                       -- 图标 URL（可填 cftc 直链）
   sort        INTEGER NOT NULL DEFAULT 0,
+  hidden      INTEGER NOT NULL DEFAULT 0, -- 0=可见 1=隐藏
   created_at  INTEGER NOT NULL
 );
 
@@ -71,4 +72,9 @@ INSERT OR IGNORE INTO settings (key, value) VALUES
   ('search_engine_selector_show', 'true'),
   ('content_layout', '{"max_width":1200,"max_width_unit":"px","margin_x":0,"margin_top":0,"margin_bottom":0}'),
   ('navigation', '{"position":"left","always_expanded":false}'),
-  ('footer_html', '""');
+  ('footer_html', '""'),
+  ('hide_password', '""');
+
+-- Migration: add hidden column for existing databases
+-- D1 does not support IF NOT EXISTS for ALTER TABLE, errors are expected and safe to ignore
+-- The column was added in schema version 2.

@@ -8,6 +8,7 @@ export function normalizeImportCategory(c: Category, now: number): Category {
     id: c.id,
     title: c.title,
     icon: c.icon ?? null,
+    hidden: c.hidden ?? 0,
     sort: Number.isFinite(c.sort) ? c.sort : 0,
     created_at: c.created_at || now,
   }

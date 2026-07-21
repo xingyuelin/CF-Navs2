@@ -11,6 +11,8 @@ import {
   type ChangePasswordReq,
   type DataVersionResp,
   type FaviconResp,
+  type HideVerifyReq,
+  type HideVerifyResp,
   type IconifySearchResp,
   type ImportReq,
   type ImportResp,
@@ -396,6 +398,10 @@ export const dataApi = {
   importAll: (payload: ImportReq) => jsonRequest<ImportResp>('/import', 'POST', payload, true),
 }
 
+export const hideApi = {
+  verify: (payload: HideVerifyReq) => jsonRequest<HideVerifyResp>('/hide/verify', 'POST', payload),
+}
+
 export const api = {
   install: installApi,
   config: configApi,
@@ -407,6 +413,7 @@ export const api = {
   iconify: iconifyApi,
   settings: settingsApi,
   data: dataApi,
+  hide: hideApi,
 }
 
 export default api

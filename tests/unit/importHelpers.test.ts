@@ -6,48 +6,49 @@ describe('normalizeImportCategory', () => {
   const now = 1700000000000
 
   it('passes through well-formed categories', () => {
-    const input: Category = { id: 1, title: 'Tools', icon: '/icon.svg', sort: 3, created_at: 100 }
+    const input: Category = { id: 1, title: 'Tools', icon: '/icon.svg', hidden: 0, sort: 3, created_at: 100 }
     const output = normalizeImportCategory(input, now)
 
     expect(output).toEqual({
       id: 1,
       title: 'Tools',
       icon: '/icon.svg',
+      hidden: 0,
       sort: 3,
       created_at: 100,
     })
   })
 
   it('defaults null icon to null', () => {
-    const input: Category = { id: 2, title: 'Empty', icon: null, sort: 0, created_at: 0 }
+    const input: Category = { id: 2, title: 'Empty', icon: null, hidden: 0, sort: 0, created_at: 0 }
     const output = normalizeImportCategory(input, now)
 
     expect(output.icon).toBeNull()
   })
 
   it('defaults missing or NaN sort to 0', () => {
-    const input: Category = { id: 3, title: 'Bad', icon: null, sort: NaN, created_at: 0 }
+    const input: Category = { id: 3, title: 'Bad', icon: null, hidden: 0, sort: NaN, created_at: 0 }
     const output = normalizeImportCategory(input, now)
 
     expect(output.sort).toBe(0)
   })
 
   it('defaults missing sort (undefined) to 0', () => {
-    const input = { id: 4, title: 'NoSort', icon: null, created_at: 0 } as unknown as Category
+    const input = { id: 4, title: 'NoSort', icon: null, hidden: 0, created_at: 0 } as unknown as Category
     const output = normalizeImportCategory(input, now)
 
     expect(output.sort).toBe(0)
   })
 
   it('falls back to now when created_at is falsy', () => {
-    const input: Category = { id: 5, title: 'Fresh', icon: null, sort: 1, created_at: 0 }
+    const input: Category = { id: 5, title: 'Fresh', icon: null, hidden: 0, sort: 1, created_at: 0 }
     const output = normalizeImportCategory(input, now)
 
     expect(output.created_at).toBe(now)
   })
 
   it('keeps negative sort if finite', () => {
-    const input: Category = { id: 6, title: 'Neg', icon: null, sort: -5, created_at: 50 }
+    const input: Category = { id: 6, title: 'Neg', icon: null, hidden: 0, sort: -5, created_at: 50 }
     const output = normalizeImportCategory(input, now)
 
     expect(output.sort).toBe(-5)
